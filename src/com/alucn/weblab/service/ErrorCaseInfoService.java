@@ -15,7 +15,7 @@ import com.alucn.casemanager.server.common.util.ParamUtil;
 import com.alucn.weblab.dao.impl.ErrorCaseDaoImpl;
 /**
  * @author haiqiw
- * 2017Äê6ÔÂ12ÈÕ ÉÏÎç10:35:18
+ * 2017ï¿½ï¿½6ï¿½ï¿½12ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½10:35:18
  * desc:ErrorCaseInfoService
  */
 @Service("errorCaseInfoService")
@@ -30,13 +30,13 @@ public class ErrorCaseInfoService {
 		errroCases = new HashMap<String, String>();
 		String dbFile = ParamUtil.getUnableDynamicRefreshedConfigVal("DailyCaseDB");
 		JdbcUtil jdbc = new JdbcUtil(Constant.DATASOURCE, dbFile);
-		String getFeatureOfUser = "SELECT DISTINCT feature_number FROM DftTag WHERE author='"+userName+"'";
+		String getFeatureOfUser = "SELECT DISTINCT feature_number FROM DailyCase WHERE author='"+userName+"'";
 		ArrayList<HashMap<String, Object>> result = errorCaseDaoImpl.query(jdbc, getFeatureOfUser);
 		for(int i=0; i<result.size();i++){
 			Map<String, Object> obj = result.get(i);
 			for(String key: obj.keySet()){
 				String featureNum = (String)obj.get(key);
-				String getCaseName = "SELECT case_name FROM DftTag WHERE author='"+userName+"' AND feature_number='" + featureNum+"' AND case_status='F';";
+				String getCaseName = "SELECT case_name FROM DailyCase WHERE author='"+userName+"' AND feature_number='" + featureNum+"' AND case_status='F';";
 				ArrayList<HashMap<String, Object>> resultCaseName = errorCaseDaoImpl.query(jdbc, getCaseName);
 				if(resultCaseName.size()>0){
 					errroCases.put(featureNum, String.valueOf(resultCaseName.size()));

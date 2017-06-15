@@ -518,7 +518,7 @@ public class DistriButeCaseToLab {
                  }
              }
              
-             query_sql = "select case_name from DailyCase;";
+             query_sql = "select case_name from DailyCase where case_status = 'I';";
              //query_sql = "select case_name from DailyCase where case_name not in (select case_name from toDistributeCases);";
              ResultSet result2=state.executeQuery(query_sql);
              while(result2.next())
@@ -526,7 +526,7 @@ public class DistriButeCaseToLab {
                  caseList.add(result2.getString("case_name"));
              }  
              
-             query_sql = "delete from toDistributeCases where case_name in (select case_name from toDistributeCases where case_name not in (select case_name from DailyCase));";
+             query_sql = "delete from toDistributeCases where case_name in (select case_name from toDistributeCases where case_name not in (select case_name from DailyCase where case_status = 'I';));";
              state.executeUpdate(query_sql);
              if(caseList.size() > 0)
              {
