@@ -164,7 +164,7 @@ public class DistriButeCaseToLab {
             IsExist = false;
             for(int j = 0; j < Servers.size(); j++)
             {
-                ServerMem = Servers.getJSONObject(i).getJSONObject(Constant.LAB);
+                ServerMem = Servers.getJSONObject(j).getJSONObject(Constant.LAB);
                 if(ServerDB.getString("serverName").equals(ServerMem.getString(Constant.SERVERNAME)))
                 {
                     IsExist = true;
@@ -313,7 +313,7 @@ public class DistriButeCaseToLab {
         Statement state=null;
         String QuerySql = null;
         String CaseInfoDB =ParamUtil.getUnableDynamicRefreshedConfigVal("CaseInfoDB");
-        String caseListStr = caseList.toString().replace("\"", "'").replace("[", "").replace("]", "");
+        String caseListStr = caseList.toString().replace("\"", "'").replace("[", "(").replace("]", ")");
         int GroupId = 0;
         try
         {
@@ -321,7 +321,8 @@ public class DistriButeCaseToLab {
          
          connection=DriverManager.getConnection("jdbc:sqlite:"+CaseInfoDB);
          state = connection.createStatement();
-         QuerySql = "select max(group_id) from toDistributeCases";
+         
+         QuerySql = "select max(group_id) from toDistributeCases where case_name not in " + caseListStr;
          try
          {
              ResultSet result=state.executeQuery(QuerySql);
@@ -346,8 +347,8 @@ public class DistriButeCaseToLab {
              
          
          QuerySql = "select D.case_name, D.base_data, D.special_data, D.lab_number, D.mate, D.customer, C.SPA, C.DB as RTDB, C.SecData as second_data "
-                 + "from DailyCase as D, CaseDepends as C where D.case_name = C.case_name and D.case_name in (" +  caseListStr   
-                 + ") order by D.lab_number, D.mate, D.special_data,  D.base_data, C.SecData, D.case_name;";
+                 + "from DailyCase as D, CaseDepends as C where D.case_name = C.case_name and D.case_name in " +  caseListStr   
+                 + " order by D.lab_number, D.mate, D.special_data,  D.base_data, C.SecData, D.case_name;";
          //int change_num = state.executeUpdate(UpdateSql);
          //logger.error(QuerySql);
          String caseName;
@@ -357,6 +358,7 @@ public class DistriButeCaseToLab {
          String old_base_data = "INIT", new_base_data;
          String old_second_data = "INIT", new_second_data;
          String SPA, RTDB;
+         String customer;
          JSONArray spaArray, rtdbArray; 
          boolean IsSame = true;
          
@@ -365,7 +367,7 @@ public class DistriButeCaseToLab {
          JSONObject ServerMem;
          ResultSet result2=state.executeQuery(QuerySql);
          PreparedStatement prep = connection.prepareStatement(
-                 "replace into toDistributeCases values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
+                 "replace into toDistributeCases values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
       
          boolean isExcute = false;
          
@@ -377,6 +379,7 @@ public class DistriButeCaseToLab {
              new_special_data = result2.getString("special_data");
              new_base_data = result2.getString("base_data");
              new_second_data = result2.getString("second_data");
+             customer = result2.getString("customer");
              SPA = result2.getString("SPA");
              RTDB = result2.getString("RTDB");
              spaArray = JSONArray.fromObject(SPA.split(","));
@@ -447,7 +450,8 @@ public class DistriButeCaseToLab {
              prep.setString(7, spaArray.toString());
              prep.setString(8, rtdbArray.toString());
              prep.setString(9, kvmList.toString());
-             prep.setInt(10, GroupId);
+             prep.setString(10, customer);
+             prep.setInt(11, GroupId);
              prep.addBatch();
              isExcute = true;
          }
@@ -507,10 +511,10 @@ public class DistriButeCaseToLab {
                  query_sql = "select case_name from toDistributeCases where ";
                  for (int i = 0; i < KVMList.size(); i ++)
                  {
-                     query_sql += "server like '%" + KVMList.getString(i) +"%' or";
+                     query_sql += "server like '%" + KVMList.getString(i) +"%' or ";
                  }
-                 query_sql = query_sql.substring(0, query_sql.length()-3) + ";";
-             
+                 query_sql = query_sql.substring(0, query_sql.length()-4) + ";";
+                 logger.debug(query_sql);
                  ResultSet result=state.executeQuery(query_sql);
                  while(result.next())
                  {
@@ -526,7 +530,7 @@ public class DistriButeCaseToLab {
                  caseList.add(result2.getString("case_name"));
              }  
              
-             query_sql = "delete from toDistributeCases where case_name in (select case_name from toDistributeCases where case_name not in (select case_name from DailyCase where case_status = 'I';));";
+             query_sql = "delete from toDistributeCases where case_name in (select case_name from toDistributeCases where case_name not in (select case_name from DailyCase where case_status = 'I'));";
              state.executeUpdate(query_sql);
              if(caseList.size() > 0)
              {
@@ -593,6 +597,7 @@ public class DistriButeCaseToLab {
                      + case_name_list.toString().replace("\"", "'").replace("[", "(").replace("]", ")")     + " order by group_id";
              logger.info(query_sql);
              ResultSet result=state.executeQuery(query_sql);
+             int CaseCount = 0;
              while(result.next())
              {
                  new_group =  result.getInt("group_id");
@@ -605,6 +610,11 @@ public class DistriButeCaseToLab {
                      old_group = new_group;
                  }
                  caseList.add(result.getString("case_name"));
+                 CaseCount ++;
+                 if(CaseCount >= Integer.valueOf(ParamUtil.getUnableDynamicRefreshedConfigVal("max_case_size_for_one_lab")))
+                 {
+                     break;
+                 }
                  
              }
              logger.info(ServerName + " case: " + caseList.toString());
@@ -655,8 +665,11 @@ public class DistriButeCaseToLab {
         {
             if(Servers.getJSONObject(i).getJSONObject(Constant.TASKSTATUS).getString(Constant.STATUS).equals(Constant.CASESTATUSIDLE))
             {
+                
                 ServerMem = Servers.getJSONObject(i).getJSONObject(Constant.LAB);
                 String serverName = ServerMem.getString(Constant.SERVERNAME);
+                
+                logger.debug("idle server: " + serverName);
                 String serverIp = ServerMem.getString(Constant.IP);
                 JSONArray caseList = genCaseListToLab(serverName);
                 JSONObject labInfo = new JSONObject();
