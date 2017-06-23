@@ -10,6 +10,8 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import org.apache.log4j.Logger;
 import com.alucn.casemanager.server.common.CaseConfigurationCache;
 import com.alucn.casemanager.server.common.constant.Constant;
@@ -26,14 +28,17 @@ import net.sf.json.JSONObject;
  */
 
 public class ReceiveAndSendRun implements Runnable {
-	BufferedReader input;
-	BufferedWriter out;
-	BufferedInputStream bis;
-	Socket socket;
-	String host;
-	public static Logger logger = Logger.getLogger(ReceiveAndSendRun.class);
+	private BufferedReader input;
+	private BufferedWriter out;
+	private BufferedInputStream bis;
+	private Socket socket;
+	private static Logger logger = Logger.getLogger(ReceiveAndSendRun.class);
+	private final BlockingQueue<String> sendMessageBlockingQueue = new ArrayBlockingQueue<String>(20, false);
+	public static String serverName;
 	
 	public void run() {
+		Thread sendThread = new Thread(new SendMessage());
+		sendThread.start();
 		int countNum =0;
 		while(true){
 			try {
@@ -49,7 +54,6 @@ public class ReceiveAndSendRun implements Runnable {
 				if(Constant.EMBEDDED_MESSAGE_REQ.equals(reqJson)){
 					logger.info("[Health monitoring in progress...]");
 					countNum =0;
-					CaseConfigurationCache.socketInfo.put(host, socket);
 					rspResult = Constant.EMBEDDED_MESSAGE_RSP;
 				}
 				//b.Get response message
@@ -58,17 +62,15 @@ public class ReceiveAndSendRun implements Runnable {
 					MainProcess mainProcess = new MainProcess();
 					long start=0L,end=0L;
 					start = System.currentTimeMillis();
-					rspResult = mainProcess.process(reqJson, socket);
+					rspResult = mainProcess.process(reqJson, socket, sendMessageBlockingQueue);
 					end = System.currentTimeMillis();
 					logger.info("Request processing time"+(end-start));
 				}
 				//3.Send response message (string)
 				this.sendMessage(rspResult);
 				logger.info("[Send response message (string):"+rspResult+"]");
-//				socket.sendUrgentData(0xFF);
 			}catch (SysException e) {
-				logger.error("[Failed to receive or send message]");
-				logger.error(""+e.getMessage()+"");
+				logger.error("[Failed to receive or send message]"+e.getMessage());
 				logger.error(ParamUtil.getErrMsgStrOfOriginalException(e.getCause()));
 			} catch (Exception e) {
 				logger.error("[Failed to receive or send message]");
@@ -78,7 +80,7 @@ public class ReceiveAndSendRun implements Runnable {
                     JSONArray currKeyStatus = CaseConfigurationCache.readOrWriteSingletonCaseProperties(CaseConfigurationCache.lock,true,null);
                     for(int i=0; i<currKeyStatus.size();i++){
                         JSONObject tmpJsonObject = (JSONObject) currKeyStatus.get(i);
-                        if(tmpJsonObject.getJSONObject(Constant.LAB).getString(Constant.IP).equals(this.host)){
+                        if(tmpJsonObject.getJSONObject(Constant.LAB).getString(Constant.SERVERNAME).equals(serverName)){
                         	tmpJsonObject.getJSONObject(Constant.TASKSTATUS).put(Constant.STATUS, Constant.CASESTATUSDEAD);
                         	tmpJsonObject.getJSONObject(Constant.TASKSTATUS).put(Constant.RUNNINGCASE, "");
                         	CaseConfigurationCache.readOrWriteSingletonCaseProperties(CaseConfigurationCache.lock,false,tmpJsonObject);
@@ -107,17 +109,24 @@ public class ReceiveAndSendRun implements Runnable {
 		this.bis = new BufferedInputStream(socket.getInputStream()); 
 		this.input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		this.out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-		this.host = socket.getInetAddress().toString().replace("/", "");
 	}
 	
-	public void setSocket(Socket socket) throws IOException {
-		this.socket = socket;
-		this.bis = new BufferedInputStream(socket.getInputStream()); 
-		this.input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-		this.out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-		this.host = socket.getInetAddress().toString().replace("/", "");
+	class SendMessage implements Runnable {
+		public SendMessage(){}
+		@Override
+		public void run() {
+			while(true){
+				try {
+					logger.info("send message thread is started !");
+					String message = sendMessageBlockingQueue.take();
+					sendMessage(message);
+					Thread.sleep(Integer.parseInt(ParamUtil.getUnableDynamicRefreshedConfigVal("case.client.socket.time")));
+				} catch (Exception e) {
+					logger.error("[Failed to send message]"+e.getMessage());
+				}
+			}
+		}
 	}
-	
 	/**
 	 * log format
 	 * @return

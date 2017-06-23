@@ -6,13 +6,9 @@ import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
-
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
-
 import org.apache.log4j.Logger;
-
-import com.alucn.casemanager.server.common.CaseConfigurationCache;
 import com.alucn.casemanager.server.common.util.ParamUtil;
 import com.alucn.casemanager.server.process.ReceiveAndSendRun;
 
@@ -49,7 +45,7 @@ public class SocketListener implements ServletContextListener {
 			listenerPort = Integer.parseInt(ParamUtil.getUnableDynamicRefreshedConfigVal("case.socket.listener.port"));
 			// maximum number of threads to handle socket requests
 			final int synThreadMaxNumber = Integer.parseInt(ParamUtil.getUnableDynamicRefreshedConfigVal("case.syn.thread_max_number"));
-			logger.info("[maximum number of threads to handle socket requests：" + synThreadMaxNumber + "]");
+			logger.info("[maximum number of threads to handle socket requests" + synThreadMaxNumber + "]");
 			
 			
 			try {
@@ -91,7 +87,6 @@ public class SocketListener implements ServletContextListener {
 								logger.debug("socket.getInetAddress()  = " +socket.getInetAddress());
 								//Number of active threads in the thread pool
 								logger.debug("threadPoolExecutor.getActiveCount()  = " +threadPoolExecutor.getActiveCount());
-//								sendSysBusyMessage(socket);
 							}else{
 								//request host
 								String host = socket.getInetAddress().toString().replace("/", "");
@@ -101,20 +96,13 @@ public class SocketListener implements ServletContextListener {
 								logger.debug("threadPoolExecutor.getActiveCount()  = " +threadPoolExecutor.getActiveCount());
 								 
 								socket.setSoTimeout(readTimeout);
-								Socket socketInfo = CaseConfigurationCache.socketInfo.get(host);
-								//Start thread only when the connection is established for the first time
-								if(socketInfo==null || socketInfo.isClosed()){
-									executorService.execute(new ReceiveAndSendRun(socket));
-								}else{
-									logger.info("[host "+host+ " Already connect...]");
-									socket.close();
-								}
+								executorService.execute(new ReceiveAndSendRun(socket));
 							}
 						} catch (Exception e) {
 							logger.error("[Failed to monitor master thread socket processing]");
 							if(null!=socket){
 								//Request host address
-								logger.error("[Socket request host address： " +socket.getInetAddress()+"]");
+								logger.error("[Socket request host address锛� " +socket.getInetAddress()+"]");
 							}
 							logger.error(ParamUtil.getErrMsgStrOfOriginalException(e));
 						}
@@ -129,31 +117,6 @@ public class SocketListener implements ServletContextListener {
 			throw e;
 		} 
 	}
-	
-	/**
-	 * send response
-	 */
-/*	public void sendSysBusyMessage(Socket socket) throws IOException {
-		Head head = new Head();
-//		head.setRtncode(RtnCodeConstants.EC_00000_CODE);
-//		head.setRtntextcd(RtnCodeConstants.EC_00000_MSG);
-		String sysBusyMsg =  head.getJson();
-		//head
-		int jsonDataLength = sysBusyMsg.getBytes(Constant.CHARACTER_SET_ENCODING_UTF8).length;
-		DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
-		dos.write(int2ByteArr(jsonDataLength));
-		dos.write(sysBusyMsg.getBytes(Constant.CHARACTER_SET_ENCODING_UTF8));
-		dos.flush();
-		logger.error("["+socket.getInetAddress()+" the request is busy with the response system ]");
-		if(null != null){
-			dos.close();
-			dos = null;
-		}
-		if(null != socket && !socket.isClosed()){
-			socket.close();
-			socket = null;
-		}
-	}*/
 	
 	/**
 	 * @param i

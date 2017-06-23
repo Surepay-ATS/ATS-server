@@ -1,20 +1,17 @@
 package com.alucn.casemanager.server.common;
 
-import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
-
 import org.apache.log4j.Logger;
-
 import com.alucn.casemanager.server.common.constant.Constant;
 import com.alucn.casemanager.server.common.util.JdbcUtil;
 import com.alucn.casemanager.server.common.util.ParamUtil;
@@ -25,7 +22,7 @@ public class CaseConfigurationCache {
 	//Case attribute configuration with dynamic refresh
 	private static JSONArray singletonCaseProperties ;
 	//Cache socket long connection information
-	public static ConcurrentMap<String, Socket> socketInfo = null;
+	public static ConcurrentMap<String, BlockingQueue<String>> queueOfClient = null;
 	//command configuration with dynamic refresh
 	public static JSONObject singletonCaseCommand ;
 	
@@ -33,7 +30,7 @@ public class CaseConfigurationCache {
 		try {
 			singletonCaseProperties=new JSONArray();
 			singletonCaseCommand=new JSONObject();
-			socketInfo = new ConcurrentHashMap<String, Socket>();
+			queueOfClient = new ConcurrentHashMap<String, BlockingQueue<String>>();
 			lock = new ReentrantReadWriteLock(false);
 		} catch (Exception e) {
 			logger.error("[CaseConfigurationCache exception construct]", e);
@@ -54,22 +51,22 @@ public class CaseConfigurationCache {
 			try {
 				lock.writeLock().lock();
 				boolean isExist = false;
-				String ip = body.getJSONObject(Constant.LAB).getString(Constant.IP);
+				String serverName = body.getJSONObject(Constant.LAB).getString(Constant.SERVERNAME);
 				String taskStatus = body.getJSONObject(Constant.TASKSTATUS).toString();
 				if(singletonCaseProperties.size()==0){
-					logger.info("[add host "+ip+" status : "+taskStatus+"]");
+					logger.info("[add host "+serverName+" status : "+taskStatus+"]");
 					singletonCaseProperties.add(body);
 				}else{
 					for(int i=0; i<singletonCaseProperties.size();i++){
 						JSONObject tmpJsonObject = (JSONObject) singletonCaseProperties.get(i);
-						if(tmpJsonObject.getJSONObject(Constant.LAB).getString(Constant.IP).equals(ip)){
-							singletonCaseProperties.remove(i);
-							singletonCaseProperties.add(body);
+						if(tmpJsonObject.getJSONObject(Constant.LAB).getString(Constant.SERVERNAME).equals(serverName)){
+//							singletonCaseProperties.remove(i);
+							singletonCaseProperties.set(i,body);
 							isExist = true;
-							logger.info("[refresh "+ip+" status : "+taskStatus+"]");
+							logger.info("[refresh "+serverName+" status : "+taskStatus+"]");
 						}
 						if(i==singletonCaseProperties.size()-1 && !isExist){
-							logger.info("[add host "+ip+" status : "+taskStatus+"]");
+							logger.info("[add host "+serverName+" status : "+taskStatus+"]");
 							singletonCaseProperties.add(body);
 							break;
 						}

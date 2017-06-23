@@ -20,7 +20,7 @@ import com.alucn.weblab.service.ErrorCaseInfoService;
  */
 
 @Controller
-@RequestMapping("/errorCaseInfo")
+//@RequestMapping("/errorCaseInfo")
 public class ErrorCaseInfoController {
 	
 	@Autowired(required=true)

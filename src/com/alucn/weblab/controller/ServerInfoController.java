@@ -19,7 +19,7 @@ import net.sf.json.JSONObject;
  * desc: serverinfo
  */
 @Controller
-@RequestMapping("/serverInfo")
+//@RequestMapping("/serverInfo")
 public class ServerInfoController {
 	
 	@Autowired
@@ -35,11 +35,11 @@ public class ServerInfoController {
 	}
 
 	@RequestMapping(path = "/getServerDetails")
-	public String getServerDetails(String ip, Model model){
+	public String getServerDetails(String serverName, Model model){
 		JSONArray infos = serverInfoService.getServerInfo();
 		for(int i=0; i<infos.size(); i++){
 			JSONObject info = infos.getJSONObject(i);
-			if(ip.equals(info.getJSONObject(Constant.LAB).getString(Constant.IP))){
+			if(serverName.equals(info.getJSONObject(Constant.LAB).getString(Constant.SERVERNAME))){
 				model.addAttribute("info", info);
 			}
 		}

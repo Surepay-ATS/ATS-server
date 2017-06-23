@@ -1,19 +1,9 @@
 package com.alucn.weblab.disarray;
 
-import java.io.IOException;
 import java.sql.*;
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.apache.log4j.Logger;
-
 import com.alucn.casemanager.server.common.util.ParamUtil;
 import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
 
 public class DbOperation {
 
@@ -38,7 +28,7 @@ public class DbOperation {
              }
              UpdateSql = UpdateSql.substring(0, UpdateSql.length()-2) + ");";
              
-             int Result = stat.executeUpdate( UpdateSql);
+             stat.executeUpdate( UpdateSql);
          
         }
         catch(SQLException e1)
@@ -92,7 +82,7 @@ public class DbOperation {
              }
              
              connection.setAutoCommit(false);
-             int []num = prep.executeBatch();
+             prep.executeBatch();
              connection.setAutoCommit(true);
          
         }

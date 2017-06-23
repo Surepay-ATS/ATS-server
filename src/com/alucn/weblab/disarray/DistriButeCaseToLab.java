@@ -8,14 +8,10 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.UUID;
-
 import org.apache.log4j.Logger;
-
 import com.alucn.casemanager.server.common.CaseConfigurationCache;
 import com.alucn.casemanager.server.common.constant.Constant;
 import com.alucn.casemanager.server.common.util.ParamUtil;
-import com.alucn.casemanager.server.listener.MainListener;
-
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
@@ -128,18 +124,6 @@ public class DistriButeCaseToLab {
         for(int i = 0; i < B.size(); i ++)
         {
             if(!IsInJSONArrayWithoutCase(B.getString(i).toUpperCase(), A))
-            {
-                return false;
-            }
-        }
-        return true;
-    }
-    
-    private boolean isJSONArrayContainsJSONArray(JSONArray A, JSONArray B)
-    {
-        for(int i = 0; i < B.size(); i ++)
-        {
-            if(!IsInJSONArray(B.getString(i), A))
             {
                 return false;
             }
@@ -534,7 +518,6 @@ public class DistriButeCaseToLab {
              state.executeUpdate(query_sql);
              if(caseList.size() > 0)
              {
-                 JSONArray Servers =  CaseConfigurationCache.readOrWriteSingletonCaseProperties(CaseConfigurationCache.lock, true, null);
                  UpdateCaseStatusDB(caseList);
              }
          
@@ -670,13 +653,12 @@ public class DistriButeCaseToLab {
                 String serverName = ServerMem.getString(Constant.SERVERNAME);
                 
                 logger.debug("idle server: " + serverName);
-                String serverIp = ServerMem.getString(Constant.IP);
                 JSONArray caseList = genCaseListToLab(serverName);
                 JSONObject labInfo = new JSONObject();
                 labInfo.put("uuid", UUID.randomUUID().toString());
                 labInfo.put("case_list", caseList);
                 DbOperation.UpdateDistributedCase(caseList, serverName);
-                Cases.put(serverIp, labInfo);
+                Cases.put(serverName, labInfo);
             }
         }
         AvailableCases.put("availableCase", Cases);
