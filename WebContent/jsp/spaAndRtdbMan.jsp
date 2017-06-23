@@ -6,12 +6,12 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
-<script src="../jquery/jquery-3.2.1.js"></script>
-<script src="../bootstrap/js/bootstrap.min.js"></script>
-<link href="../jquery-ui/jquery-ui.min.css" rel="stylesheet">
-<script src="../jquery-ui/jquery-ui.min.js"></script>
-<link href="../css/adminstyle.css" rel="stylesheet">
+<link href="./bootstrap/css/bootstrap.min.css" rel="stylesheet">
+<script src="./jquery/jquery-3.2.1.js"></script>
+<script src="./bootstrap/js/bootstrap.min.js"></script>
+<link href="./jquery-ui/jquery-ui.min.css" rel="stylesheet">
+<script src="./jquery-ui/jquery-ui.min.js"></script>
+<link href="./css/adminstyle.css" rel="stylesheet">
 <title>SPA and RTDB</title>
 <script>
 	$(function() {
@@ -20,7 +20,7 @@
 				modal : true,
 				buttons : {
 					"Confirm" : function() {
-						$.post("../spaAndRtdbMan/removeSpaAndRtdbInfo.do", {
+						$.post("./removeSpaAndRtdbInfo.do", {
 							click : click,
 							spa : spa,
 							rtdb : rtdb
@@ -104,7 +104,7 @@
 														}
 														$
 																.post(
-																		"../spaAndRtdbMan/addSpaAndRtdbInfo.do",
+																		"./addSpaAndRtdbInfo.do",
 																		{
 																			click : "add",
 																			spa : spa,
@@ -200,18 +200,18 @@
 							class="icon-bar"></span><span class="icon-bar"></span><span
 							class="icon-bar"></span>
 					</button>
-					<a class="navbar-brand" href="../login/userLoginBackHome.do">Home</a>
+					<a class="navbar-brand" href="./userLoginBackHome.do">Home</a>
 				</div>
 				<div class="collapse navbar-collapse"
 					id="bs-example-navbar-collapse-1">
 					<ul class="nav navbar-nav">
-						<li><a href="../serverInfo/getServerInfo.do">Servers</a></li>
-						<li><a href="../errorCaseInfo/getErrorCaseInfo.do">Error Cases</a></li>
+						<li><a href="./getServerInfo.do">Servers</a></li>
+						<li><a href="./getErrorCaseInfo.do">Error Cases</a></li>
 						<li class="dropdown active"><a href="#"
 							class="dropdown-toggle" data-toggle="dropdown">Admin<strong
 								class="caret"></strong></a>
 							<ul class="dropdown-menu">
-								<li class="active"><a href="../spaAndRtdbMan/getSpaAndRtdbInfo.do">SPA
+								<li class="active"><a href="./getSpaAndRtdbInfo.do">SPA
 										and RTDB</a></li>
 								<li class="divider"></li>
 							</ul></li>
@@ -223,7 +223,7 @@
 						<button type="submit" class="btn btn-default">Search</button>
 					</form>
 					<ul class="nav navbar-nav navbar-right">
-						<li id="logout"><a href="LogoutServlet">Logout</a></li>
+						<li id="logout"><a href="./userLogout.do">Logout</a></li>
 					</ul>
 				</div>
 				</nav>

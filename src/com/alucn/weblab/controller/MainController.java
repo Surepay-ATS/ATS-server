@@ -12,7 +12,7 @@ import com.alucn.weblab.service.MainService;
  * desc:MainController
  */
 @Controller
-@RequestMapping("/main")
+//@RequestMapping("/main")
 public class MainController {
 	
 	@Autowired

@@ -17,7 +17,7 @@ import com.alucn.weblab.service.SpaAndRtdbManService;
  */
 
 @Controller
-@RequestMapping("/spaAndRtdbMan")
+//@RequestMapping("/spaAndRtdbMan")
 public class SpaAndRtdbManController {
 	
 	@Autowired(required=true)

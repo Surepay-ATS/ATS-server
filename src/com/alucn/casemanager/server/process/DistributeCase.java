@@ -35,8 +35,7 @@ public class DistributeCase implements Runnable{
 				logger.info("[DistributeCase...]");
 				//distribute case
 				DistriButeCaseToLab disarrayCase = new DistriButeCaseToLab();
-                JSONObject caseList = disarrayCase.GetDistributeCases().getJSONObject("availableCase");
-				//JSONObject caseList = JSONObject.fromObject(disArray.getDisResult()).getJSONObject(Constant.AVAILABLECASE);
+                JSONObject caseList = disarrayCase.GetDistributeCases().getJSONObject(Constant.AVAILABLECASE);
 				if(0 != caseList.size()){
 					logger.info("[case  list :]"+caseList.toString());
 				}
@@ -71,7 +70,7 @@ public class DistributeCase implements Runnable{
 		}
 	}
 	
-    public void distributeCase(ConcurrentHashMap<String, String> caseList) throws IOException{
+    public void distributeCase(ConcurrentHashMap<String, String> caseList) throws IOException, InterruptedException{
 
         while(true)
         {
@@ -84,24 +83,24 @@ public class DistributeCase implements Runnable{
                 String key = it.next().toString();
                 JSONArray case_array = JSONObject.fromObject(caseList.get(key)).getJSONArray(Constant.CASELIST);
                 String value = caseList.get(key);
-                if(CaseConfigurationCache.socketInfo.get(key) != null){
+                if(CaseConfigurationCache.queueOfClient.get(key) != null){
                     JSONArray currKeyStatus = CaseConfigurationCache.readOrWriteSingletonCaseProperties(CaseConfigurationCache.lock,true,null);
                     for(int i=0; i<currKeyStatus.size();i++){
                         JSONObject tmpJsonObject = (JSONObject) currKeyStatus.get(i);
-                        String ip = tmpJsonObject.getJSONObject(Constant.LAB).getString(Constant.IP);
+                        String serverName = tmpJsonObject.getJSONObject(Constant.LAB).getString(Constant.SERVERNAME);
                         String status = tmpJsonObject.getJSONObject(Constant.TASKSTATUS).getString(Constant.STATUS);
-                        if(ip.equals(key)){
+                        if(serverName.equals(key)){
                             if(status.equals(Constant.CASESTATUSDEAD)){
                                 caseList.remove(key);
                             }else{
-                                if(null != clientACK.get(ip) && clientACK.get(ip)){
+                                if(null != clientACK.get(serverName) && clientACK.get(serverName)){
                                     caseList.remove(key);
-                                    clientACK.remove(ip);
+                                    clientACK.remove(serverName);
                                     break;
                                 }
                                 if (case_array.size() > 0){
                                     IsCaseExist = true;
-                                    sendMessage(Constant.AVAILABLECASE+":"+value,CaseConfigurationCache.socketInfo.get(key));
+                                    CaseConfigurationCache.queueOfClient.get(key).put(Constant.AVAILABLECASE+":"+value);
                                     tmpJsonObject.getJSONObject(Constant.TASKSTATUS).put(Constant.STATUS, Constant.CASESTATUSREADY);
                                     CaseConfigurationCache.readOrWriteSingletonCaseProperties(CaseConfigurationCache.lock,false,tmpJsonObject);
                                 }

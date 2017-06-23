@@ -31,7 +31,7 @@ public class CaseCacheOpt {
 	}
 	//4.caselistack
 	public static String caseListAck(JSONObject body) throws Exception{
-		DistributeCase.clientACK.put(body.getJSONObject(Constant.LAB).getString(Constant.IP), true);
+		DistributeCase.clientACK.put(body.getJSONObject(Constant.LAB).getString(Constant.SERVERNAME), true);
 		return Constant.ACKUPDATE;
 	}
 }

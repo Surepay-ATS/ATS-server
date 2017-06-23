@@ -4,11 +4,11 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
-<script src="../jquery/jquery-3.2.1.js"></script>
-<script src="../jquery/jquery.cookie.js"></script>
-<script src="../bootstrap/js/bootstrap.min.js"></script>
-<link href="../css/style.css" rel="stylesheet">
+<link href="./bootstrap/css/bootstrap.min.css" rel="stylesheet">
+<script src="./jquery/jquery-3.2.1.js"></script>
+<script src="./jquery/jquery.cookie.js"></script>
+<script src="./bootstrap/js/bootstrap.min.js"></script>
+<link href="./css/style.css" rel="stylesheet">
 <title>Please Login</title>
 </head>
 <body>
@@ -17,7 +17,7 @@
 			<div class="col-md-4 column"></div>
 			<div class="col-md-4 column">
 				<form class="form-horizontal login"
-					action="../login/userLoginCheckOut.do" method="post">
+					action="./userLoginCheckOut.do" method="post">
 					<div class="form-group login-title">
 						<strong>Please Login</strong>
 					</div>

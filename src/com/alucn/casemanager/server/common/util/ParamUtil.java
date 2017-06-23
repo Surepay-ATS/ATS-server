@@ -73,7 +73,6 @@ public class ParamUtil {
 	}
 	
 	public static JSONObject getReqBody(String reqJson) throws Exception{
-		//get head
 		JSONObject jBody = JSONObject.fromObject(reqJson).getJSONObject(Constant.BODY);
 		return jBody;
 	}

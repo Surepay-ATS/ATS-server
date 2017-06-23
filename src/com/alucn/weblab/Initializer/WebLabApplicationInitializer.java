@@ -14,7 +14,7 @@ import com.alucn.weblab.xmlconfig.WebConfig;
 
 /**
  * @author haiqiw
- * 2017��6��2�� ����2:34:42
+ * 2017年6月21日 上午10:32:50
  * desc:Initializer
  */
 public class WebLabApplicationInitializer implements WebApplicationInitializer{
@@ -41,7 +41,7 @@ public class WebLabApplicationInitializer implements WebApplicationInitializer{
 	 
 	public void initServer(ServletContext servletContext){
 	    String configPath = System.getenv("WEBLAB_CONF");
-		//String [] args = {servletContext.getRealPath("conf")};
+//		String [] args = {servletContext.getRealPath("conf")};
 	    String [] args = {configPath};
 		MainListener.init(args);
 	}

@@ -13,11 +13,11 @@ import com.alucn.weblab.service.LoginService;
 
 /**
  * @author haiqiw
- * 2017Äê6ÔÂ2ÈÕ ÏÂÎç4:09:28
+ * 2017ï¿½ï¿½6ï¿½ï¿½2ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½4:09:28
  * desc: user login
  */
 @Controller
-@RequestMapping("/login")
+//@RequestMapping("/login")
 public class LoginController {
 	
 	@Autowired
@@ -28,16 +28,25 @@ public class LoginController {
         return "login";
     }
 	
+	@RequestMapping(path = "/userLogout")
+    public String logout(HttpSession session) {
+		String useName = session.getAttribute("login").toString();
+		 if(null != useName && !"".equals(useName)){ 
+			 session.removeAttribute("login"); 
+	     }
+        return "login";
+    }
+	
 	@RequestMapping(path = "/userLoginCheckOut", method = RequestMethod.POST)
     public String loginCheckOut(User user, HttpSession session, Model model) {
 		loginService.getUser(user);
 		session.setAttribute("login", user.getUserName());
-        return "forward:/main/getStatistics.do";
+        return "forward:/getStatistics.do";
     }
 	
 	@RequestMapping(path = "/userLoginBackHome", method = RequestMethod.GET)
     public String userLoginBackHome() {
-        return "forward:/main/getStatistics.do";
+        return "forward:/getStatistics.do";
     }
 
 	public LoginService getLoginService() {
