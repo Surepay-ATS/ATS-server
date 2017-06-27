@@ -175,6 +175,7 @@
 							<ul class="dropdown-menu">
 								<li class="active"><a href="./getSpaAndRtdbInfo.do">SPA
 										and RTDB</a></li>
+										<li><a href="./config.do">Config Manage</a></li>
 								<li class="divider"></li>
 							</ul></li>
 					</ul>
@@ -242,6 +243,25 @@
 							<td>
 								<div class="row clearfix">
 									<div class="col-md-12 column">RTDB:</div>
+								</div>
+							<td colspan="3" class="text-right">
+								<div class="row clearfix">
+									<div class="col-md-10 column">
+										<input class="form-control" placeholder="Separated by commas"
+											type="text" name="serverRTDB" id="serverRTDB">
+									</div>
+									<div class="col-md-2 column text-right">
+										<button type="button" class="btn btn-default "
+											name="checkrtdb" id="checkrtdb">Select</button>
+									</div>
+								</div>
+							</td>
+
+						</tr>
+						<tr>
+							<td>
+								<div class="row clearfix">
+									<div class="col-md-12 column">Attach Servers:</div>
 								</div>
 							<td colspan="3" class="text-right">
 								<div class="row clearfix">

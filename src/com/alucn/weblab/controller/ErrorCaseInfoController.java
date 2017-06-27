@@ -15,8 +15,8 @@ import com.alucn.weblab.service.ErrorCaseInfoService;
 
 /**
  * @author haiqiw
- * 2017Äê6ÔÂ2ÈÕ ÏÂÎç5:39:08
- * desc: errorcaseinfo
+ * 2017å¹´6æœˆ23æ—¥ ä¸‹åˆ1:57:22
+ * desc:ErrorCaseInfoController
  */
 
 @Controller

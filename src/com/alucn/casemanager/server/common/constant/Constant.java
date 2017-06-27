@@ -47,5 +47,23 @@ public class Constant {
 	public static final String CASELIST = "case_list";
 	public static final String SPAANDRTDB = "spaANDrtdb.txt";
 	public static final JSONObject CASESTATUSPRE = JSONObject.fromObject("{\"head\": {\"reqType\": \"\",\"response\": \"\"},\"body\": {\"lab\": {\"serverIp\": \"\",\"serverName\": \"test\",\"serverRelease\": \"test\",\"serverProtocol\": \"test\",\"serverSPA\": [],\"serverRTDB\": []},\"taskStatus\": {\"status\": \"Dead\",\"runningCase\": \"\"},\"taskResult\": {\"success\": [{\"name\": \"\",\"time\": \"\"}],\"fail\": []}}}");
-
+	public static final String LISTENERPORT="case.socket.listener.port";
+	public static final String READPERIODTIMEOUT="case.socket.read_period_timeout";
+	public static final String READTIMEOUT="case.socket.read_timeout";
+	public static final String QUEUEMAXSIZE="case.socket.wait_queue_max_size";
+	public static final String THREADMAXNUMBER = "case.syn.thread_max_number";
+	public static final String CASECLIENTSTATUSTIME = "case.client.status.time";
+	public static final String CASECLIENTSOCKETTIME = "case.client.socket.time";
+	public static final String CASECLIENTCOMMANDTIME = "case.client.command.time";
+	public static final String CASECLIENTDISTRIBUTETIME = "case.client.distribute.time";
+	public static final String CASECLIENTRETRYTIME = "case.client.retry.time";
+	public static final String CASEDFTAGTIMERDELAY = "case.dftag.timer.delay";
+	public static final String CASEDFTAGTIMERPERIOD = "case.dftag.timer.period";
+	public static final String MAXCASESIZEFORONELAB = "max_case_size_for_one_lab";
+	public static final String CASECLIENTSFTPSENDSHELLNAME = "case.client.sftp.sendshellname";
+	public static final String CASECLIENTSFTPSOURCEPATH = "case.client.sftp.sourcepath";
+	public static final String CASECLIENTSFTPTARGETPATH = "case.client.sftp.targetpath";
+	public static final String CASECLIENTSFTPUSERNAME = "case.client.sftp.username";
+	public static final String CASECLIENTSFTPPASSWORD = "case.client.sftp.password";
+	public static final String CASECLIENTSFTPPORT = "case.client.sftp.port";
 }

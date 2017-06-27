@@ -3,17 +3,17 @@ package com.alucn.weblab.service;
 import java.io.File;
 import org.springframework.stereotype.Service;
 import com.alucn.casemanager.server.common.CaseConfigurationCache;
+import com.alucn.casemanager.server.common.ConfigProperites;
 import com.alucn.casemanager.server.common.constant.Constant;
 import com.alucn.casemanager.server.common.util.Fifowriter;
 import com.alucn.casemanager.server.common.util.FileUtil;
-import com.alucn.casemanager.server.common.util.ParamUtil;
 import com.alucn.weblab.model.Server;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 /**
  * @author haiqiw
- * 2017Äê6ÔÂ5ÈÕ ÏÂÎç6:28:09
+ * 2017ï¿½ï¿½6ï¿½ï¿½5ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½6:28:09
  * desc:ServerInfoService
  */
 @Service("serverInfoService")
@@ -25,13 +25,13 @@ public class ServerInfoService {
 	}
 	
 	public void addServerDetails(Server server) throws Exception{
-		String filePath = ParamUtil.getUnableDynamicRefreshedConfigVal("case.client.sftp.sourcepath");
+		String filePath = ConfigProperites.getInstance().getCaseClientSftpSourcePath();
 		Fifowriter.writerFile(filePath, Constant.SPAANDRTDB, JSONObject.fromObject(server).toString());
-		String sftpTargetPath = ParamUtil.getUnableDynamicRefreshedConfigVal("case.client.sftp.targetpath");
-		String shellName = ParamUtil.getUnableDynamicRefreshedConfigVal("case.client.sftp.sendshellname");
-		String userName = ParamUtil.getUnableDynamicRefreshedConfigVal("case.client.sftp.username");
-		String password = ParamUtil.getUnableDynamicRefreshedConfigVal("case.client.sftp.password");
-		int port = Integer.parseInt(ParamUtil.getUnableDynamicRefreshedConfigVal("case.client.sftp.password"));
+		String sftpTargetPath = ConfigProperites.getInstance().getCaseClientSftpTargetPath();
+		String shellName = ConfigProperites.getInstance().getCaseClientSftpSendShellName();
+		String userName = ConfigProperites.getInstance().getCaseClientSftpUserName();
+		String password = ConfigProperites.getInstance().getCaseClientSftpPassword();
+		int port = Integer.parseInt(ConfigProperites.getInstance().getCaseClientSftpPort());
 		FileUtil.upLoadFile(FileUtil.createSession(server.getServerIp(), userName, password, port), filePath, sftpTargetPath);
 		String[] cmds = new String[] {"sh "+sftpTargetPath+File.separator+shellName};
 		String[] result = FileUtil.execShellCmdBySSH(server.getServerIp(), port, userName, password, cmds);

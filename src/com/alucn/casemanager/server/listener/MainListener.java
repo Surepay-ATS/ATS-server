@@ -1,11 +1,16 @@
 package com.alucn.casemanager.server.listener;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import com.alucn.casemanager.server.common.ConfigProperites;
+import com.alucn.casemanager.server.common.constant.Constant;
 import com.alucn.casemanager.server.common.exception.SysException;
+import com.alucn.casemanager.server.common.util.JdbcUtil;
 import com.alucn.casemanager.server.common.util.ParamUtil;
 import com.alucn.casemanager.server.process.DistributeCase;
 
@@ -31,9 +36,17 @@ public class MainListener {
 				//log4j Initialization
 				PropertyConfigurator.configure(configFilesPath+File.separator+"log4j.properties");
 				//Init config
-				ConfigProperites.getInstance();
+				String dbFile = ParamUtil.getUnableDynamicRefreshedConfigVal("CaseInfoDB");
+				JdbcUtil jdbc = new JdbcUtil(Constant.DATASOURCE, dbFile);
+				Map<String, String> mapConfigs = new HashMap<String, String>();
+				String queryConfigs = "select * from config";
+				ArrayList<HashMap<String,Object>> configs = jdbc.query(queryConfigs);
+				for(int i=0; i<configs.size(); i++){
+					mapConfigs.put(configs.get(i).get("con_key").toString(), configs.get(i).get("con_value").toString());
+				}
+				ConfigProperites.getInstance().refreshConfiguration(mapConfigs);
 				//init timer
-//				new DftagTimer(Integer.parseInt(ParamUtil.getUnableDynamicRefreshedConfigVal("case.dftag.timer.delay")),Integer.parseInt(ParamUtil.getUnableDynamicRefreshedConfigVal("case.dftag.timer.delay")));
+//				new DftagTimer(Integer.parseInt(ConfigProperites.getInstance().getCaseDftagTimerDelay()),Integer.parseInt(ConfigProperites.getInstance().getCaseDftagTimerDelay()));
 				
 				logger.info("-----------------------------------------------------------------------------------");
 				logger.info("	java.class.path = "+System.getProperties().getProperty("java.class.path"));
@@ -73,6 +86,5 @@ public class MainListener {
 	}
 	public static void main(String[] args) {
 		init(args);
-		
 	}
 }

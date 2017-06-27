@@ -14,6 +14,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import org.apache.log4j.Logger;
 import com.alucn.casemanager.server.common.CaseConfigurationCache;
+import com.alucn.casemanager.server.common.ConfigProperites;
 import com.alucn.casemanager.server.common.constant.Constant;
 import com.alucn.casemanager.server.common.exception.SysException;
 import com.alucn.casemanager.server.common.util.ParamUtil;
@@ -76,7 +77,7 @@ public class ReceiveAndSendRun implements Runnable {
 				logger.error("[Failed to receive or send message]");
 				logger.error(ParamUtil.getErrMsgStrOfOriginalException(e));
 			}finally{
-				if(countNum >= Integer.parseInt(ParamUtil.getUnableDynamicRefreshedConfigVal("case.client.retry.time"))){
+				if(countNum >= Integer.parseInt(ConfigProperites.getInstance().getCaseClientRetryTime())){
                     JSONArray currKeyStatus = CaseConfigurationCache.readOrWriteSingletonCaseProperties(CaseConfigurationCache.lock,true,null);
                     for(int i=0; i<currKeyStatus.size();i++){
                         JSONObject tmpJsonObject = (JSONObject) currKeyStatus.get(i);
@@ -95,7 +96,7 @@ public class ReceiveAndSendRun implements Runnable {
 				    break;
 				}
 				try {
-					Thread.sleep(Integer.parseInt(ParamUtil.getUnableDynamicRefreshedConfigVal("case.client.socket.time")));
+					Thread.sleep(Integer.parseInt(ConfigProperites.getInstance().getCaseClientSocketTime()));
 				} catch (NumberFormatException | InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -120,7 +121,7 @@ public class ReceiveAndSendRun implements Runnable {
 					logger.info("send message thread is started !");
 					String message = sendMessageBlockingQueue.take();
 					sendMessage(message);
-					Thread.sleep(Integer.parseInt(ParamUtil.getUnableDynamicRefreshedConfigVal("case.client.socket.time")));
+					Thread.sleep(Integer.parseInt(ConfigProperites.getInstance().getCaseClientSocketTime()));
 				} catch (Exception e) {
 					logger.error("[Failed to send message]"+e.getMessage());
 				}
@@ -200,7 +201,7 @@ public class ReceiveAndSendRun implements Runnable {
 		//Read byte length
 		int onceReadByteCount = 0;
 //		ConfigProperites cp = ConfigProperites.getInstance();
-		int mills = Integer.parseInt(ParamUtil.getUnableDynamicRefreshedConfigVal("case.socket.read_period_timeout"));
+		int mills = Integer.parseInt(ConfigProperites.getInstance().getReadPeriodTimeout());
 		long timeDiff = mills;
 		long start = System.currentTimeMillis();
 		while(completeReadByteCount < byteNumber){

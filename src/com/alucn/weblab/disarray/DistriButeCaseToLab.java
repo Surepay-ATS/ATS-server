@@ -10,6 +10,7 @@ import java.sql.Statement;
 import java.util.UUID;
 import org.apache.log4j.Logger;
 import com.alucn.casemanager.server.common.CaseConfigurationCache;
+import com.alucn.casemanager.server.common.ConfigProperites;
 import com.alucn.casemanager.server.common.constant.Constant;
 import com.alucn.casemanager.server.common.util.ParamUtil;
 import net.sf.json.JSONArray;
@@ -594,7 +595,7 @@ public class DistriButeCaseToLab {
                  }
                  caseList.add(result.getString("case_name"));
                  CaseCount ++;
-                 if(CaseCount >= Integer.valueOf(ParamUtil.getUnableDynamicRefreshedConfigVal("max_case_size_for_one_lab")))
+                 if(CaseCount >= Integer.valueOf(ConfigProperites.getInstance().getMaxCaseSizeForOneLab()))
                  {
                      break;
                  }

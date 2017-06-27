@@ -213,6 +213,7 @@
 							<ul class="dropdown-menu">
 								<li class="active"><a href="./getSpaAndRtdbInfo.do">SPA
 										and RTDB</a></li>
+										<li><a href="./config.do">Config Manage</a></li>
 								<li class="divider"></li>
 							</ul></li>
 					</ul>

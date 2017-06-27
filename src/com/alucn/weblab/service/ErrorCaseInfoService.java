@@ -15,7 +15,7 @@ import com.alucn.casemanager.server.common.util.ParamUtil;
 import com.alucn.weblab.dao.impl.ErrorCaseDaoImpl;
 /**
  * @author haiqiw
- * 2017��6��12�� ����10:35:18
+ * 2017年6月23日 下午2:02:28
  * desc:ErrorCaseInfoService
  */
 @Service("errorCaseInfoService")

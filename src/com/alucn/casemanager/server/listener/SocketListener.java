@@ -9,6 +9,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import org.apache.log4j.Logger;
+
+import com.alucn.casemanager.server.common.ConfigProperites;
 import com.alucn.casemanager.server.common.util.ParamUtil;
 import com.alucn.casemanager.server.process.ReceiveAndSendRun;
 
@@ -42,9 +44,9 @@ public class SocketListener implements ServletContextListener {
 			logger.info("[SocketListener Init...]");
 			
 			// listener port
-			listenerPort = Integer.parseInt(ParamUtil.getUnableDynamicRefreshedConfigVal("case.socket.listener.port"));
+			listenerPort = Integer.parseInt(ConfigProperites.getInstance().getListenerPort());
 			// maximum number of threads to handle socket requests
-			final int synThreadMaxNumber = Integer.parseInt(ParamUtil.getUnableDynamicRefreshedConfigVal("case.syn.thread_max_number"));
+			final int synThreadMaxNumber = Integer.parseInt(ConfigProperites.getInstance().getThreadMaxNumber());
 			logger.info("[maximum number of threads to handle socket requests" + synThreadMaxNumber + "]");
 			
 			
@@ -73,8 +75,8 @@ public class SocketListener implements ServletContextListener {
 					//Socket to be processed
 					Socket socket = null;
 					
-					int readTimeout = Integer.parseInt(ParamUtil.getUnableDynamicRefreshedConfigVal("case.socket.read_timeout"));
-					int waitQueueMaxSize  = Integer.parseInt(ParamUtil.getUnableDynamicRefreshedConfigVal("case.socket.wait_queue_max_size"));
+					int readTimeout = Integer.parseInt(ConfigProperites.getInstance().getReadTimeout());
+					int waitQueueMaxSize  = Integer.parseInt(ConfigProperites.getInstance().getQueueMaxSize());
 					//Loop blocking port
 					while (!serverSocket.isClosed()) {
 						try {
