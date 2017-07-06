@@ -229,6 +229,11 @@
 						</c:forEach></td>
 					</tr>
 					<tr>
+						<td>Attach Servers:</td>
+						<td class="subdetail" colspan="3">
+						</td>
+					</tr>
+					<tr>
 						<td colspan="4" class="submit">
 							<button class="btn btn-default" name="back" id="back">back</button>
 							<button class="btn btn-default" name="cancelAll" id="cancelAll">Cancel
