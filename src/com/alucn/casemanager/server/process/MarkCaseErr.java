@@ -12,50 +12,44 @@ import com.alucn.casemanager.server.common.constant.Constant;
 import com.alucn.casemanager.server.common.util.JdbcUtil;
 import com.alucn.casemanager.server.common.util.ParamUtil;
 
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+
 public class MarkCaseErr {
 	private static final Logger logger = Logger.getLogger(DftagTimer.class);
 
-    Timer timer;
+    Timer timerRemindTask;
+    Timer timerRemindTaskAgain;
     public MarkCaseErr(int delay,int period){  
-        timer = new Timer();  
-        timer.schedule(new RemindTask(),delay*1000, period*1000);  
+    	timerRemindTask = new Timer();  
+    	timerRemindTaskAgain = new Timer();
+    	timerRemindTask.schedule(new RemindTask(),delay*1000, period*1000);  
+    	timerRemindTaskAgain.schedule(new RemindTaskAgain(),delay*1000, period*1000*10);
     }  
-    class RemindTask extends TimerTask{  
+    class RemindTask extends TimerTask{
+    	@Override
         public void run(){  
-        	logger.info("Time''s up!");  
+        	logger.info("[MarkCaseErr Time''s Up!]");  
             try {
-				JdbcUtil jdbc_dc = new JdbcUtil(Constant.DATASOURCE,ParamUtil.getUnableDynamicRefreshedConfigVal("DailyCaseDB"));
 				JdbcUtil jdbc_cf = new JdbcUtil(Constant.DATASOURCE,ParamUtil.getUnableDynamicRefreshedConfigVal("CaseInfoDB"));
-				JdbcUtil jdbc_dp = new JdbcUtil(Constant.DATASOURCE,ParamUtil.getUnableDynamicRefreshedConfigVal("PortingCaseDB"));
-				String dfttag_sql = "select * from DftTag where porting_release != 'NA' group by feature_number";
-				List<Map<String, Object>> list_dc = jdbc_dc.findModeResult(dfttag_sql, null);
-				for(int i=0; i<list_dc.size(); i++){
-					if(!list_dc.get(i).get("porting_release").toString().startsWith(list_dc.get(i).get("release").toString())){
-						String dftporting_sql = "select distinct(porting_release) from DftPorting where feature_number='"+list_dc.get(i).get("feature_number").toString()+"'";
-						List<Map<String, Object>> list_dftp = jdbc_dp.findModeResult(dftporting_sql, null);
-						if(list_dftp.size()==0 || !list_dc.get(i).get("porting_release").toString().contains(list_dftp.get(0).get("porting_release").toString())){
-							String featureinfo_sql = "select distinct(ftc_date) from FeatureInfo where feature_id = '"+list_dc.get(i).get("feature_number").toString()+"' and case_num>0";
-							List<Map<String, Object>> list_fi = jdbc_cf.findModeResult(featureinfo_sql, null);
-							if(list_fi.size()==0){
-								//TODO send mail
-						    	System.out.println("send mail");
-							}else{
-								Date dt=new Date();
-							    SimpleDateFormat matter1=new SimpleDateFormat("yyyy-MM-dd");
-							    if(Integer.parseInt(matter1.format(dt).replaceAll("-", ""))-Integer.parseInt(list_fi.get(0).get("ftc_date").toString())>60){
-							    	//TODO send mail
-							    	System.out.println("send mail");
-							    }else{
-							    	//TODO
-							    }
-							}
-						}
-					}
-				}
+				String errorCaseSql = "select casename, fature, err_reason, owner, insert_date, mark_date, email_date from errorcaseinfo where email_date='' and mark_date='';";
+				List<Map<String, Object>> list_dc = jdbc_cf.findModeResult(errorCaseSql, null);
+				
+//				genReport(JSONArray cc_list, JSONArray to_list, JSONArray report, JSONObject buildInfo);
             } catch (Exception e) {
 				e.printStackTrace();
-				logger.error("[timer is error:]", e);
+				logger.error("[MarkCaseErr Timer Is Error:]", e);
 			}
         }  
     }  
+    
+    class RemindTaskAgain extends TimerTask{
+
+		@Override
+		public void run() {
+			// TODO Auto-generated method stub
+			
+		}
+    	
+    }
 }

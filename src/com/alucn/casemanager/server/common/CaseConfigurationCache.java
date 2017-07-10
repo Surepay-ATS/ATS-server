@@ -114,10 +114,10 @@ public class CaseConfigurationCache {
 			jdbc_dc.executeSql(dfttagdaily_sql);
 			
 			Date dt=new Date();
-		    SimpleDateFormat matter=new SimpleDateFormat("yyyy-MM-dd");
+		    SimpleDateFormat matter=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			dfttag_sql = "select * from DailyCase where case_name='"+caseName+"'";
 			List<Map<String, Object>> list_dc = jdbc_dc.findModeResult(dfttag_sql, null);
-			String caseerr_sql = "replace into errorcaseinfo (casename, fature, err_reason, owner, insert_date, mark_date) values('"+caseName+"', '"+list_dc.get(0).get("feature_number")+"', '', '"+list_dc.get(0).get("author")+"', '"+matter.format(dt)+"', '')";
+			String caseerr_sql = "replace into errorcaseinfo (casename, fature, err_reason, owner, insert_date, mark_date, email_date) values('"+caseName+"', '"+list_dc.get(0).get("feature_number")+"', '', '"+list_dc.get(0).get("author")+"', '"+matter.format(dt)+"', '', '')";
 			jdbc_cf.executeSql(caseerr_sql);
 		}
 		

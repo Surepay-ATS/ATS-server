@@ -14,8 +14,6 @@ import com.alucn.casemanager.server.common.constant.Constant;
 public class ParamUtil {
 	public static Logger logger = Logger.getLogger(ParamUtil.class);
 	
-
-	
 	public static String getErrMsgStrOfOriginalException(Throwable e){
 		StringBuffer errmsg = new StringBuffer();
 		if(null != e){
