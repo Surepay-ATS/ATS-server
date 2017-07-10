@@ -1,5 +1,13 @@
 package com.alucn.weblab.disarray;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -9,6 +17,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.UUID;
 import org.apache.log4j.Logger;
+import org.omg.CORBA.PRIVATE_MEMBER;
+
 import com.alucn.casemanager.server.common.CaseConfigurationCache;
 import com.alucn.casemanager.server.common.ConfigProperites;
 import com.alucn.casemanager.server.common.constant.Constant;
@@ -130,6 +140,20 @@ public class DistriButeCaseToLab {
             }
         }
         return true;
+    }
+    
+    private int postionInJSONArray(Object value, JSONArray list)
+    {
+        for(int i = 0; i < list.size(); i++)
+        {
+            String A_value = String.valueOf(list.get(i)).toUpperCase();
+            if(A_value.startsWith(String.valueOf(value)))
+            {
+                return i;
+            }
+        }
+        
+        return -1;
     }
     
     
@@ -292,6 +316,56 @@ public class DistriButeCaseToLab {
         return pattern.matcher(str).matches();     
     }  */
     
+    
+    private JSONArray GetReleaseList()
+    {
+        JSONArray releaseArray = new JSONArray();
+        URL url;
+        try {
+            url = new URL ("http://135.251.249.250/hg/SurepayDraft/rawfile/tip/.info/TagConfig.json");
+            InputStream inputStream = null;
+            InputStreamReader inputStreamReader = null;
+            BufferedReader reader = null;
+            String tempLine, response = "";
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setDoOutput(true);
+            if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                inputStream = connection.getInputStream();
+                inputStreamReader = new InputStreamReader(inputStream);
+                reader = new BufferedReader(inputStreamReader);
+                
+                while ((tempLine = reader.readLine()) != null) {
+                    response += tempLine;
+                
+                }
+                
+                JSONObject tagInfos = JSONObject.fromObject(response);
+                JSONArray SingleList = tagInfos.getJSONArray("single");
+                for(int i = 0; i < SingleList.size(); i++)
+                {
+                    if(SingleList.getJSONObject(i).getString("name").equals("release"))
+                    {
+                        releaseArray = SingleList.getJSONObject(i).getJSONArray("value");
+                    }
+                }
+                
+            }
+        } catch (MalformedURLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (ProtocolException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
+        
+        return releaseArray;
+    }
+    
     private void UpdateCaseStatusDB(JSONArray caseList)
     {
         Connection connection=null;
@@ -331,7 +405,7 @@ public class DistriButeCaseToLab {
          }
              
          
-         QuerySql = "select D.case_name, D.base_data, D.special_data, D.lab_number, D.mate, D.customer, C.SPA, C.DB as RTDB, C.SecData as second_data "
+         QuerySql = "select D.case_name, D.base_data, D.special_data, D.lab_number, D.mate, D.customer, D.release, D.porting_release, C.SPA, C.DB as RTDB, C.SecData as second_data "
                  + "from DailyCase as D, CaseDepends as C where D.case_name = C.case_name and D.case_name in " +  caseListStr   
                  + " order by D.lab_number, D.mate, D.special_data,  D.base_data, C.SecData, D.case_name;";
          //int change_num = state.executeUpdate(UpdateSql);
@@ -343,7 +417,7 @@ public class DistriButeCaseToLab {
          String old_base_data = "INIT", new_base_data;
          String old_second_data = "INIT", new_second_data;
          String SPA, RTDB;
-         String customer;
+         String customer, release, porting_release;
          JSONArray spaArray, rtdbArray; 
          boolean IsSame = true;
          
@@ -352,7 +426,7 @@ public class DistriButeCaseToLab {
          JSONObject ServerMem;
          ResultSet result2=state.executeQuery(QuerySql);
          PreparedStatement prep = connection.prepareStatement(
-                 "replace into toDistributeCases values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
+                 "replace into toDistributeCases values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
       
          boolean isExcute = false;
          
@@ -365,6 +439,8 @@ public class DistriButeCaseToLab {
              new_base_data = result2.getString("base_data");
              new_second_data = result2.getString("second_data");
              customer = result2.getString("customer");
+             release = result2.getString("release");
+             porting_release = result2.getString("porting_release");
              SPA = result2.getString("SPA");
              RTDB = result2.getString("RTDB");
              spaArray = JSONArray.fromObject(SPA.split(","));
@@ -376,6 +452,8 @@ public class DistriButeCaseToLab {
                  String serverName = ServerMem.getString(Constant.SERVERNAME);
                  JSONArray spaList = ServerMem.getJSONArray(Constant.SERVERSPA);
                  JSONArray rtdbList = ServerMem.getJSONArray(Constant.SERVERRTDB);
+                 String serverProtocol = ServerMem.getString(Constant.SERVERPROTOCOL);
+                 String serverRelease = ServerMem.getString(Constant.SERVERRELEASE);
                  //logger.error("Server: " + spaList.toString() + " ----  " + rtdbList.toString());
                  if(!isLabListContainsCaseList(spaList, spaArray))
                  {
@@ -385,6 +463,44 @@ public class DistriButeCaseToLab {
                  if(!isLabListContainsCaseList(rtdbList, rtdbArray))
                  {
                      //logger.error("Server: " + rtdbList.toString() + " case: " + rtdbArray.toString());
+                     continue;
+                 }
+                 if((serverProtocol.equals("ANSI") && !customer.equals("VZW")) || (serverProtocol.equals("ITU") && customer.equals("VZW")))
+                 {
+                     continue;
+                 }
+                 boolean isReleaseMath = false;
+                 if(serverRelease.equals(release))
+                 {
+                     isReleaseMath = true;
+                 }
+                 else
+                 {
+                     JSONArray portingReleaseList = JSONArray.fromObject("[\"" + porting_release.replace("+", "").replace(",", "\",\"") + "\"]");
+                     if(IsInJSONArray(serverRelease,portingReleaseList))
+                     {
+                         isReleaseMath = true;
+                     }
+                     else
+                     {
+                         if(porting_release.endsWith("+"))
+                         {
+                             int serverReleasePostion = postionInJSONArray(serverRelease,portingReleaseList );
+                             if(serverReleasePostion!= -1)
+                             {
+                                 int LastReleasePostion = postionInJSONArray(porting_release.substring(porting_release.lastIndexOf(",")+1, porting_release.length() -1),portingReleaseList );
+                                 if(LastReleasePostion != -1 && serverReleasePostion >= LastReleasePostion)
+                                 {
+                                     isReleaseMath = true;
+                                 }
+                             }
+                         }
+                     }
+                     
+                 }
+                 
+                 if(!isReleaseMath)
+                 {
                      continue;
                  }
                  kvmList.add(serverName);
@@ -432,11 +548,13 @@ public class DistriButeCaseToLab {
              prep.setString(4, new_special_data);
              prep.setString(5, new_base_data);
              prep.setString(6, new_second_data);
-             prep.setString(7, spaArray.toString());
-             prep.setString(8, rtdbArray.toString());
-             prep.setString(9, kvmList.toString());
-             prep.setString(10, customer);
-             prep.setInt(11, GroupId);
+             prep.setString(7, release);
+             prep.setString(8, porting_release);
+             prep.setString(9, spaArray.toString());
+             prep.setString(10, rtdbArray.toString());
+             prep.setString(11, kvmList.toString());
+             prep.setString(12, customer);
+             prep.setInt(13, GroupId);
              prep.addBatch();
              isExcute = true;
          }

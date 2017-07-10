@@ -16,6 +16,7 @@ public class Constant {
 	public static final String LAB = "lab";
 	public static final String IP = "serverIp";
 	public static final String SERVERNAME = "serverName";
+	public static final String SERVERRELEASE = "serverRelease";
 	public static final String SERVERPROTOCOL = "serverProtocol";
 	public static final String SERVERSPA = "serverSPA";
 	public static final String SERVERRTDB = "serverRTDB";
