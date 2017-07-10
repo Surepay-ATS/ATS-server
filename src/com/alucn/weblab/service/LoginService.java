@@ -8,7 +8,7 @@ import com.alucn.weblab.model.User;
 
 /**
  * @author haiqiw
- * 2017Äê6ÔÂ5ÈÕ ÏÂÎç5:27:40
+ * 2017ï¿½ï¿½6ï¿½ï¿½5ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½5:27:40
  * desc:LoginService
  */
 @Service("loginService")
@@ -16,10 +16,17 @@ public class LoginService {
 	
 	@Autowired(required=true)
 	private UserDaoImpl userDaoImpl;
-	
+	private static String  AuthSuccess = "SLLAUTHSUCCESS";
 	
 	public boolean getUser(User user){
-		return false;
+	    
+	    LdapAuthentication ldapAuth = new LdapAuthentication(user.getUserName(),user.getPassWord());
+        String AuthResult = ldapAuth.getAuth();
+        if(AuthResult.equals(AuthSuccess))
+        {
+            return true;
+        }
+        return false;
 	}
 	public UserDaoImpl getUserDaoImpl() {
 		return userDaoImpl;

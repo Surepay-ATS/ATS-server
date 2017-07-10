@@ -40,6 +40,7 @@ public class LoginController {
 	@RequestMapping(path = "/userLoginCheckOut", method = RequestMethod.POST)
     public String loginCheckOut(User user, HttpSession session, Model model) {
 		loginService.getUser(user);
+		
 		session.setAttribute("login", user.getUserName());
         return "forward:/getStatistics.do";
     }
